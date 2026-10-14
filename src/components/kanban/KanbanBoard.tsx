@@ -93,6 +93,7 @@ export function KanbanBoard({
     if (to < 0) to = list.length - 1;
     const reordered = [...list];
     const [m] = reordered.splice(from, 1);
+    if (!m) return;
     reordered.splice(to, 0, m);
     setItems((prev) => ({ ...prev, [col]: reordered }));
     const siblings = reordered.filter((c) => c.id !== id);

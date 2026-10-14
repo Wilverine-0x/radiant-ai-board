@@ -129,11 +129,11 @@ function BoardLayout() {
     setEditingName(null);
     if (!name.trim() || name === board?.name) return;
     const { error } = await supabase.from("boards").update({ name: name.trim() }).eq("id", boardId);
-    if (error) return onErr(error);
+    if (error) { onErr(error); return; }
     qc.invalidateQueries({ queryKey: ["boards"] });
   };
 
-  const displayName = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "You";
+  const displayName = (user.user_metadata?.['full_name'] as string) || user.email?.split("@")[0] || "You";
 
   return (
     <div className="h-screen p-3 md:p-6">

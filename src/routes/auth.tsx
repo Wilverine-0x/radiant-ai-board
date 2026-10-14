@@ -9,7 +9,7 @@ import logo from "@/assets/pip-logo.png";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    redirect: typeof s['redirect'] === "string" ? s['redirect'] : undefined,
   }),
   head: () => ({
     meta: [
@@ -71,7 +71,7 @@ function AuthPage() {
   async function google() {
     sessionStorage.setItem("postAuth", safePath(redirect));
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) return toast.error(String(result.error.message ?? result.error));
+    if (result.error) { toast.error(String(result.error.message ?? result.error)); return; }
     if (result.redirected) return;
     done();
   }
