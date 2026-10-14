@@ -1,24 +1,35 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Flowboard — Your team boards" },
+      { name: "description", content: "Open your team's kanban boards and plan work with Pip, the AI assistant." },
+      { property: "og:title", content: "Flowboard — Your team boards" },
+      { property: "og:description", content: "Open your team's kanban boards and plan work with Pip, the AI assistant." },
+    ],
+  }),
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/auth", search: { redirect: undefined } });
+    let { data: board } = await supabase
+      .from("boards")
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!board) {
+      const { data: created, error } = await supabase
+        .from("boards")
+        .insert({ name: "My first board", created_by: data.user.id })
+        .select("id")
+        .single();
+      if (error) throw error;
+      board = created;
+    }
+    throw redirect({ to: "/board/$boardId", params: { boardId: board.id } });
+  },
+  component: () => null,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
