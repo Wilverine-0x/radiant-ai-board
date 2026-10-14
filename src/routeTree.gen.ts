@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedBoardBoardIdRouteImport } from './routes/_authenticated/board.$boardId'
+import { Route as AuthenticatedBoardBoardIdIndexRouteImport } from './routes/_authenticated/board.$boardId.index'
+import { Route as AuthenticatedBoardBoardIdChatThreadIdRouteImport } from './routes/_authenticated/board.$boardId.chat.$threadId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,18 +42,33 @@ const AuthenticatedBoardBoardIdRoute =
     path: '/board/$boardId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBoardBoardIdIndexRoute =
+  AuthenticatedBoardBoardIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedBoardBoardIdRoute,
+  } as any)
+const AuthenticatedBoardBoardIdChatThreadIdRoute =
+  AuthenticatedBoardBoardIdChatThreadIdRouteImport.update({
+    id: '/chat/$threadId',
+    path: '/chat/$threadId',
+    getParentRoute: () => AuthenticatedBoardBoardIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
-  '/board/$boardId': typeof AuthenticatedBoardBoardIdRoute
+  '/board/$boardId': typeof AuthenticatedBoardBoardIdRouteWithChildren
+  '/board/$boardId/': typeof AuthenticatedBoardBoardIdIndexRoute
+  '/board/$boardId/chat/$threadId': typeof AuthenticatedBoardBoardIdChatThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
-  '/board/$boardId': typeof AuthenticatedBoardBoardIdRoute
+  '/board/$boardId': typeof AuthenticatedBoardBoardIdIndexRoute
+  '/board/$boardId/chat/$threadId': typeof AuthenticatedBoardBoardIdChatThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,13 +76,26 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
-  '/_authenticated/board/$boardId': typeof AuthenticatedBoardBoardIdRoute
+  '/_authenticated/board/$boardId': typeof AuthenticatedBoardBoardIdRouteWithChildren
+  '/_authenticated/board/$boardId/': typeof AuthenticatedBoardBoardIdIndexRoute
+  '/_authenticated/board/$boardId/chat/$threadId': typeof AuthenticatedBoardBoardIdChatThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/api/chat' | '/board/$boardId'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/board/$boardId'
+    | '/board/$boardId/'
+    | '/board/$boardId/chat/$threadId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/api/chat' | '/board/$boardId'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/board/$boardId'
+    | '/board/$boardId/chat/$threadId'
   id:
     | '__root__'
     | '/'
@@ -73,6 +103,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/api/chat'
     | '/_authenticated/board/$boardId'
+    | '/_authenticated/board/$boardId/'
+    | '/_authenticated/board/$boardId/chat/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,15 +151,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBoardBoardIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/board/$boardId/': {
+      id: '/_authenticated/board/$boardId/'
+      path: '/'
+      fullPath: '/board/$boardId/'
+      preLoaderRoute: typeof AuthenticatedBoardBoardIdIndexRouteImport
+      parentRoute: typeof AuthenticatedBoardBoardIdRoute
+    }
+    '/_authenticated/board/$boardId/chat/$threadId': {
+      id: '/_authenticated/board/$boardId/chat/$threadId'
+      path: '/chat/$threadId'
+      fullPath: '/board/$boardId/chat/$threadId'
+      preLoaderRoute: typeof AuthenticatedBoardBoardIdChatThreadIdRouteImport
+      parentRoute: typeof AuthenticatedBoardBoardIdRoute
+    }
   }
 }
 
+interface AuthenticatedBoardBoardIdRouteChildren {
+  AuthenticatedBoardBoardIdIndexRoute: typeof AuthenticatedBoardBoardIdIndexRoute
+  AuthenticatedBoardBoardIdChatThreadIdRoute: typeof AuthenticatedBoardBoardIdChatThreadIdRoute
+}
+
+const AuthenticatedBoardBoardIdRouteChildren: AuthenticatedBoardBoardIdRouteChildren =
+  {
+    AuthenticatedBoardBoardIdIndexRoute: AuthenticatedBoardBoardIdIndexRoute,
+    AuthenticatedBoardBoardIdChatThreadIdRoute:
+      AuthenticatedBoardBoardIdChatThreadIdRoute,
+  }
+
+const AuthenticatedBoardBoardIdRouteWithChildren =
+  AuthenticatedBoardBoardIdRoute._addFileChildren(
+    AuthenticatedBoardBoardIdRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedBoardBoardIdRoute: typeof AuthenticatedBoardBoardIdRoute
+  AuthenticatedBoardBoardIdRoute: typeof AuthenticatedBoardBoardIdRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedBoardBoardIdRoute: AuthenticatedBoardBoardIdRoute,
+  AuthenticatedBoardBoardIdRoute: AuthenticatedBoardBoardIdRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
